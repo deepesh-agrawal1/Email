@@ -1,9 +1,13 @@
 package com.dev.Email.controller;
 
+import com.dev.Email.dto.EmailDto;
 import com.dev.Email.service.EmailService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("/email")
@@ -13,12 +17,12 @@ public class EmailController {
     private EmailService emailService;
 
 
-    @GetMapping("/send-pdf")
+    @PostMapping("/send")
     public String sendPdf(
-            @RequestParam String to)
-            throws MessagingException {
+            @RequestBody List<String> emails) throws MessagingException {
 
-        emailService.sendEmail(to,
+
+        emailService.sendEmail(emails,
                 "Graduate Seeking Software Engineering Opportunities | Ex- Intern HSBC",
                 "Hi,\n" +
                         "\n" +
@@ -40,5 +44,17 @@ public class EmailController {
                         "Email:");
 
         return "PDF Email Sent Successfully";
+    }
+    @PostMapping("/send1")
+    public String sendEmail(
+            @RequestBody EmailDto request)
+            throws MessagingException {
+
+        emailService.sendEmail(
+                Collections.singletonList(String.valueOf(request.getRecipients())),
+                request.getSubject(),
+                request.getBody());
+
+        return "Emails Sent";
     }
 }
