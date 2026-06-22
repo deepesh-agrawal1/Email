@@ -29,7 +29,12 @@ public class EmailService {
 
         helper.setTo(email);
         helper.setSubject(subject);
-        helper.setText(body);
+
+        // Personalize the body using the recipient's email address.
+        // Replace placeholder {name} in the provided body with a friendly name derived from the email local-part.
+        String name = extractNameFromEmail(email);
+        String personalizedBody = body != null ? body.replace("{name}", name) : body;
+        helper.setText(personalizedBody);
 
         FileSystemResource file =
                 new FileSystemResource(
@@ -38,5 +43,23 @@ public class EmailService {
         helper.addAttachment("Deepesh_agrawal-Resume.pdf", file);
 
         mailSender.send(message);
-    }}
+        }
+    }
+
+    // Extract a friendly name from the email local-part, e.g. "john.doe@example.com" -> "John Doe"
+    private String extractNameFromEmail(String email) {
+        if (email == null || !email.contains("@")) return "Friend";
+        String local = email.substring(0, email.indexOf('@'));
+        String[] parts = local.split("[._-]+");
+        StringBuilder name = new StringBuilder();
+        for (String p : parts) {
+            if (p == null || p.isBlank()) continue;
+            name.append(Character.toUpperCase(p.charAt(0)));
+            if (p.length() > 1) name.append(p.substring(1));
+            name.append(' ');
+        }
+        String result = name.toString().trim();
+        return result.isEmpty() ? "Friend" : result;
+    }
+
 }
