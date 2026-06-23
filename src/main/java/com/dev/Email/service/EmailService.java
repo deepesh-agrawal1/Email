@@ -3,6 +3,8 @@ package com.dev.Email.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -14,14 +16,16 @@ import java.util.List;
 @Service
 
 public class EmailService {
-
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
     @Autowired
     private JavaMailSender mailSender;
-    @Async
 
     public void sendEmail(List<String> emails, String subject, String body) throws MessagingException {
+        logger.info("Starting email send process for {} recipients with subject: {}", emails.size(), subject);
+
         for (String email : emails) {
+            try {
         MimeMessage message = mailSender.createMimeMessage();
 
         MimeMessageHelper helper =
@@ -42,8 +46,13 @@ public class EmailService {
 
         helper.addAttachment("Deepesh_agrawal-Resume.pdf", file);
 
-        mailSender.send(message);
+                mailSender.send(message);
+                logger.info("Email successfully sent to: {} | Subject: {} | Recipient Name: {}", email, subject, extractNameFromEmail(email));
+            } catch (Exception e) {
+                logger.error("Failed to send email to: {} | Subject: {} | Error: {}", email, subject, e.getMessage(), e);
+            }
         }
+        logger.info("Email send process completed for subject: {}", subject);
     }
 
     // Extract a friendly name from the email local-part, e.g. "john.doe@example.com" -> "John Doe"

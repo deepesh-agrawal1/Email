@@ -33,10 +33,13 @@ public class EmailController {
                         "I have attached my resume for your review. If there are any suitable openings that match my profile, I would be grateful for an opportunity to be considered.\n\n" +
                         "As I expect interest from multiple employers, I would appreciate the opportunity to speak with your team early — I am enthusiastic to demonstrate how I can add value.\n\n" +
                         "Thank you for your time and consideration. I look forward to hearing from you.\n\n" +
+
                         "Best Regards,\n" +
                         "Deepesh Agrawal\n" +
                         "Phone: 9527034785\n" +
-                        "Email:adevagrawal@gmail.com");
+                        "Email:adevagrawal@gmail.com\n\n\n\n"+
+
+                        "please forward this email to the concerned person if you are not the right person to contact for this role. I would be grateful for your help in connecting me with the right person.\n\n" );
 
         return "PDF Email Sent Successfully";
     }
