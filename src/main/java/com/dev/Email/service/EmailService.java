@@ -1,5 +1,7 @@
 package com.dev.Email.service;
 
+import com.dev.Email.entity.Recipient;
+import com.dev.Email.repository.RecipientRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -20,17 +23,27 @@ public class EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
+    @Autowired
+    private RecipientRepository recipientRepository;
 
     public void sendEmail(List<String> emails, String subject, String body) throws MessagingException {
         logger.info("Starting email send process for {} recipients with subject: {}", emails.size(), subject);
 
         for (String email : emails) {
-            try {
+
+            if (recipientRepository.existsByEmail(email)) {
+
+                logger.info("Skipping {} because it already exists.", email);
+
+                continue;
+            }
+
+            try  {
         MimeMessage message = mailSender.createMimeMessage();
 
         MimeMessageHelper helper =
                 new MimeMessageHelper(message, true);
-
+        helper.setFrom("agrawaldev0504@gmail.com");
         helper.setTo(email);
         helper.setSubject(subject);
 
@@ -47,6 +60,14 @@ public class EmailService {
         helper.addAttachment("Deepesh_agrawal-Resume.pdf", file);
 
                 mailSender.send(message);
+                Recipient recipient = new Recipient();
+
+                recipient.setEmail(email);
+
+                recipient.setName(extractNameFromEmail(email));
+
+                recipientRepository.save(recipient);
+                recipient.setSentAt(LocalDateTime.now());
                 logger.info("Email successfully sent to: {} | Subject: {} | Recipient Name: {}", email, subject, extractNameFromEmail(email));
             } catch (Exception e) {
                 logger.error("Failed to send email to: {} | Subject: {} | Error: {}", email, subject, e.getMessage(), e);
